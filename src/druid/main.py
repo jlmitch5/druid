@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import logging.config
 import os
@@ -19,7 +20,7 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.widgets import TextArea
 from prompt_toolkit.layout.controls import FormattedTextControl
 
-from druid import crowlib
+from druid import __version__, crowlib
 
 
 # monkey patch to fix https://github.com/monome/druid/issues/8
@@ -181,6 +182,12 @@ async def printer():
 
 
 def main():
+    # Parse arguments
+    parser = argparse.ArgumentParser(description="Terminal interface for crow")
+    parser.add_argument("-v", "--version", action="version",
+                        version=f"%(prog)s {__version__}")
+    args = parser.parse_args()
+
     logging.config.dictConfig({
         'version': 1,
         'formatters': {
@@ -210,8 +217,6 @@ def main():
     })
 
     global crow
-    loop = asyncio.get_event_loop()
-
     try:
         crow = crowlib.connect()
     except ValueError as err:
@@ -221,6 +226,8 @@ def main():
     # run script passed from command line
     if len(sys.argv) == 2:
         crowlib.execute(crow.write, myprint, sys.argv[1])
+
+    loop = asyncio.get_event_loop()
 
     use_asyncio_event_loop()
 
@@ -234,5 +241,5 @@ def main():
     exit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
